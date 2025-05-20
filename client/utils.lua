@@ -60,6 +60,9 @@ function utils.createPeds(openBank)
                         name = interactionId,
                         id = interactionId,
                         onSelect = function ()
+                            if openBank(false) then
+                                utils.sendMessage('setManagementConfig', true)
+                            end
                             -- Todo: Open Manage Bank
                         end,
                         canInteract = function ()
@@ -89,6 +92,9 @@ function utils.createPeds(openBank)
                             id = interactionId,
                             action = function ()
                                 -- Todo: Open Manage Bank
+                                if openBank(false) then
+                                    utils.sendMessage('setManagementConfig', true)
+                                end
                             end,
                             canInteract = function ()
                                 return self.manager

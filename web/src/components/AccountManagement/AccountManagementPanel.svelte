@@ -47,16 +47,21 @@
 
   function viewAccountMembers(account) {
     selectedAccount = account;
-    fetchNui('hype_banking:client:viewMemberManagement', { account }).then(response => {
-      if (response) {
+    fetchNui('hype_banking:client:viewMemberManagement', { account: account.id }).then(response => {
+      if (response && response.status ==='success') {
         accountMembers = response.members || {};
         activeView = 'viewMembers';
+      } else if (response && response.status === 'error') {
+        notify.set({
+          message: response.message || "Error fetching account members",
+          type: "error"
+        })
       }
     });
   }
 
-  function createAccount(accountId) {
-    if (!accountId) {
+  function createAccount(data) {
+    if (!data.accountId) {
       notify.set({
         message: get(translations).missing_params || "Please provide an account ID",
         type: "error"
@@ -64,7 +69,18 @@
       return;
     }
 
-    fetchNui('hype_banking:client:createNewAccount', accountId)
+    if (!data.label) {
+      notify.set({
+        message: get(translations).missing_label || "Please provide an account label",
+        type: "error"
+      });
+      return;
+    }
+
+    fetchNui('hype_banking:client:createNewAccount', { 
+      accountId: data.accountId,
+      label: data.label 
+    })
       .then((resp) => {
         if (resp && resp.status === 'success') {
           notify.set({
@@ -94,21 +110,28 @@
     }
 
     fetchNui('hype_banking:client:addAccountMember', { 
-      account: selectedAccount, 
+      account: selectedAccount.id, 
       memberId: data.memberId 
-    }).then(() => {
-      notify.set({
-        message: get(translations).member_added || "Member added successfully",
-        type: "success"
-      });
-      viewAccountMembers(selectedAccount);
+    }).then((resp) => {
+      if (resp && resp.status === 'success') {
+        notify.set({
+          message: get(translations).member_added || "Member added successfully",
+          type: "success"
+        });
+        viewAccountMembers(selectedAccount);
+      } else if (resp && resp.status === 'error') {
+        notify.set({
+          message: resp.message || "Error adding member",
+          type: "error"
+        });
+      }
     });
   }
 
   function removeAccountMember(memberId) {
     fetchNui('hype_banking:client:removeAccountMember', { 
-      account: selectedAccount, 
-      cid: memberId 
+      account: selectedAccount.id, 
+      memberId: memberId 
     }).then(() => {
       notify.set({
         message: get(translations).member_removed || "Member removed successfully",
@@ -128,22 +151,24 @@
     }
 
     fetchNui('hype_banking:client:changeAccountName', { 
-      account: selectedAccount, 
+      account: selectedAccount.id, 
       newName: data.newName 
-    }).then(() => {
-      notify.set({
-        message: get(translations).account_renamed || "Account renamed successfully",
-        type: "success"
-      });
-      fetchPlayerAccounts();
-      activeView = 'accountsList';
-      onAccountChange();
+    }).then((resp) => {
+      if (resp && resp.status === "success") {
+        notify.set({
+          message: get(translations).account_renamed || "Account renamed successfully",
+          type: "success"
+        });
+        fetchPlayerAccounts();
+        activeView = 'accountsList';
+        onAccountChange();
+      }
     });
   }
 
   function deleteAccount() {
     fetchNui('hype_banking:client:deleteAccount', { 
-      account: selectedAccount 
+      account: selectedAccount.id
     }).then(() => {
       notify.set({
         message: get(translations).account_deleted || "Account deleted successfully",
@@ -195,7 +220,7 @@
 </script>
 
 {#if isVisible}
-  <div class="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
+  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 animate-fadeIn">
     <div class="max-w-[800px] w-full bg-fleeca-bg rounded-lg shadow-card overflow-hidden animate-slideUp">
       <div class="bg-fleeca-card p-5 border-b border-fleeca-border">
         <div class="flex justify-between items-center">

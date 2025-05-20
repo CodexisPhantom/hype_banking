@@ -25,9 +25,6 @@
   function handleClickExportData() {
     if (!account) {
       notify.set("No card selected!");
-      setTimeout(() => {
-        notify.set("");
-      }, 3500);
       return;
     }
 

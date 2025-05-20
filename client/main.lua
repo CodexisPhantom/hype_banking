@@ -17,8 +17,7 @@ end
 local function openInterface(isAtm)
     if STATES.uiOpen then return end
     utils.sendMessage('setLoading', {status = true})
-    local accounts = lib.callback
-                         .await('hype_banking:server:getBankData', false)
+    local accounts = lib.callback.await('hype_banking:server:getBankData', false)
     if not accounts then
         utils.sendMessage('setLoading', {status = false})
         lib.notify({
@@ -28,17 +27,16 @@ local function openInterface(isAtm)
         })
         return
     end
-
-    SetTimeout(1000, function()
-        focusInterface(true)
-        utils.sendMessage('setVisible', {
-            status = STATES.uiOpen,
-            accounts = accounts,
-            loading = false,
-            atm = isAtm,
-            platinumThreshold = config.platinumThreshold
-        })
-    end)
+    Wait(1000)
+    focusInterface(true)
+    utils.sendMessage('setVisible', {
+        status = STATES.uiOpen,
+        accounts = accounts,
+        loading = false,
+        atm = isAtm,
+        platinumThreshold = config.platinumThreshold
+    })
+    return true
 end
 
 utils.createPeds(openInterface)
@@ -71,37 +69,43 @@ RegisterNUICallback('closeInterface', function(_, cb)
     cb('ok')
 end)
 
--- todo
+-- done
 RegisterNUICallback('hype_banking:client:getPlayerAccounts', function(_, cb)
     local accounts = lib.callback.await('hype_banking:server:getPlayerAccounts', false)
     cb(accounts)
 end)
 
--- todo
+-- done
 RegisterNUICallback('hype_banking:client:createNewAccount', function (data, cb)
     local resp = lib.callback.await('hype_banking:server:createNewAccount', false, data)
     cb(resp)
 end)
 
--- todo
+-- done
 RegisterNUICallback('hype_banking:client:viewMemberManagement', function (data, cb)
     local resp = lib.callback.await('hype_banking:server:viewMemberManagement', false, data)
     cb(resp)
 end)
 
--- todo
+-- done
 RegisterNUICallback('hype_banking:client:addAccountMember', function (data, cb)
     local resp = lib.callback.await('hype_banking:server:addAccountMember', false, data)
     cb(resp)
 end)
 
--- todo
+-- done
+RegisterNUICallback('hype_banking:client:deleteAccount', function (data, cb)
+    local resp = lib.callback.await('hype_banking:server:deleteAccount', false, data)
+    cb(resp)
+end)
+
+-- done
 RegisterNUICallback('hype_banking:client:removeAccountMember', function (data, cb)
     local resp = lib.callback.await('hype_banking:server:removeAccountMember', false, data)
     cb(resp)
 end)
 
--- todo
+-- done
 RegisterNUICallback('hype_banking:client:changeAccountName', function (data, cb)
     local resp = lib.callback.await('hype_banking:server:changeAccountName', false, data)
     cb(resp)

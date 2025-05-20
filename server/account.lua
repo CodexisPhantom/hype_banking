@@ -36,9 +36,17 @@ function account:addMoney(amount)
     return self.amount
 end
 
+function account:setAccountName(name)
+    assert(type(name) == 'string', 'Invalid name type')
+    if name == self.name then return end
+    self.name = name
+    return self.name
+end
+
 function account:removeMoney(amount)
     assert(type(amount) == 'number', 'Invalid amount type')
     assert(amount > 0, 'Invalid amount')
+    if self.amount < amount then return end
     self.amount = self.amount - amount
     return self.amount
 end
@@ -56,7 +64,7 @@ local accounts = {}
 ---@return table<string, AccountProps>
 function accounts.getAllAccounts()
     return cachedAccounts
-end
+end exports('GetAllAccounts', accounts.getAllAccounts)
 
 --- Create Account
 ---@param data AccountProps
@@ -67,6 +75,36 @@ function accounts.new(data)
     local acc = account:new(data)
     cachedAccounts[acc.id] = acc
     return acc
+end exports('CreateAccount', accounts.new)
+
+function accounts.delete(id, cachedPlayers)
+    if not cachedAccounts[id] then
+        return false
+    end
+
+    -- Remove from database
+    local success = MySQL.update.await('DELETE FROM bank_accounts_new WHERE id = ?', {
+        id
+    })
+
+    if success then
+        -- Remove from cache
+        cachedAccounts[id] = nil
+        
+        -- Remove from all cached players
+        for _, player in pairs(cachedPlayers) do
+            for i = #player.accounts, 1, -1 do
+                if player.accounts[i] == id then
+                    table.remove(player.accounts, i)
+                    break
+                end
+            end
+        end
+
+        return true
+    end
+
+    return false
 end
 
 --- Get Account

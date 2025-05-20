@@ -8,23 +8,15 @@
   import { activeTab } from '../store/stores'
   import InvoicesList from "./InvoicesList.svelte";
   import { fly } from "svelte/transition";
+  import { useNuiEvent } from "$utils/useNuiEvent";
   let showAccountManagement = false;
   let canManageAccounts = false;
   let canCreateAccounts = false;
 
-  onMount(() => {
-    fetchNui("hype_banking:client:checkAccountManagement")
-      .then((response) => {
-        if (response) {
-          canManageAccounts = response.showManagement || false;
-          canCreateAccounts = response.canCreateAccounts || false;
-        }
-      })
-      .catch(() => {
-        canManageAccounts = false;
-        canCreateAccounts = false;
-      });
-  });
+  useNuiEvent('setManagementConfig', (data: boolean) => {
+    canManageAccounts = data;
+    canCreateAccounts = data;
+  })
 
   function refreshBankData() {
     fetchNui("hype_banking:client:getBankData").then((resp) => {
@@ -95,7 +87,7 @@
 {#if showAccountManagement && !$atm}
   <AccountManagementPanel
     isVisible={true}
-    {canCreateAccounts}
+    canCreateAccounts={canCreateAccounts}
     onClose={() => (showAccountManagement = false)}
     onAccountChange={refreshBankData}
   />

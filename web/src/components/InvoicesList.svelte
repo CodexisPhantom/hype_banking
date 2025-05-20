@@ -37,9 +37,6 @@
           title: "Error",
           type: "error",
         });
-        setTimeout(() => {
-          notify.set("");
-        }, 3000);
       }
     });
   }

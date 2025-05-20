@@ -1,7 +1,7 @@
 <script lang="ts">
   import { translations } from '../../store/stores';
 
-  export let account = '';
+  export let account = {};
   export let members = {};
   export let onAddMember = (data) => {};
   export let onRemoveMember = (memberId) => {};
@@ -21,7 +21,7 @@
     {$translations.manage_members || 'Manage Account Members'}
   </h3>
   <p class="text-fleeca-text-secondary">
-    {$translations.account || 'Account'}: {account}
+    {$translations.account || 'Account'}: {account.id}
   </p>
 
   <div class="bg-fleeca-card rounded-lg border border-fleeca-border p-4">
@@ -68,6 +68,7 @@
               <div class="text-fleeca-text-secondary text-sm">{memberId}</div>
             </div>
             <button 
+              aria-label="Remove Member"
               class="w-8 h-8 rounded-full bg-fleeca-card flex items-center justify-center text-red-400 hover:text-red-500 transition-colors"
               on:click={() => onRemoveMember(memberId)}
               title={$translations.remove_member || 'Remove Member'}

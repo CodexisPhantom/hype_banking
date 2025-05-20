@@ -279,6 +279,224 @@ RegisterNetEvent('hype_banking:server:createInvoice', function (data)
     return invoice.createInvoice(data)
 end)
 
+lib.callback.register('hype_banking:server:getPlayerAccounts', function(source)
+    local Player = core.GetPlayer(source)
+    local identifier = Player.identifier
+    local playerAccounts = cachedPlayers[identifier] and cachedPlayers[identifier].accounts or {}
+    local data = {}
+    if #playerAccounts >= 1 then
+        for k=1, #playerAccounts do
+            local acc = accounts.getAccount(playerAccounts[k])
+            if acc and acc.creator == identifier then
+                data[#data+1] = {
+                    id = acc.id,
+                    name = acc.name,
+                    balance = acc.amount,
+                }
+            end
+        end
+    end
+    return data
+end)
+
+lib.callback.register('hype_banking:server:viewMemberManagement', function (source, data)
+    local Player = core.GetPlayer(source)
+    if not Player then return end
+    local account = data.account
+    local acc = accounts.getAccount(account)
+    if not acc then return end
+    local identifier = Player.identifier
+    local resp = {
+        account = account,
+        members = {}
+    }
+
+    for k,_ in pairs(acc.auth) do
+        local Player2 = core.GetPlayerById(k)
+        if Player2 and Player2.identifier ~= identifier then
+            resp.members[k] = Player2.name
+        end
+    end
+
+    return resp
+end)
+
+lib.callback.register('hype_banking:server:createNewAccount', function(source, data)
+    local Player = core.GetPlayer(source)
+    local accountId, accountLabel = data.accountId, data.label
+
+    local account = accounts.getAccount(accountId)
+    if account then return lib.notify(source, {title = locale("bank_name"), description = locale("account_taken"), type = "error"}) end
+    local identifier = Player.identifier
+    local newAccount = {
+        id = accountId,
+        type = locale("org"),
+        name = accountLabel,
+        frozen = 0,
+        amount = 0,
+        transactions = {},
+        auth = { [identifier] = true },
+        creator = identifier
+    }
+    local acc = accounts.new(newAccount)
+    cachedPlayers[identifier].accounts[#cachedPlayers[identifier].accounts+1] = accountId
+    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{
+        accountId, newAccount.amount, json.encode(newAccount.transactions), json.encode({identifier}), newAccount.frozen, identifier
+    })
+    return {
+        status = 'success',
+    }
+end)
+
+lib.callback.register('hype_banking:server:changeAccountName', function (source, data)
+    local Player = core.GetPlayer(source)
+    if not Player then return false end
+    local account, name = data.account, data.newName
+    local acc = accounts.getAccount(account)
+    if not acc then return false end
+    if Player.identifier ~= acc.creator then return false end
+    acc:setAccountName(name)
+    return {
+        status ='success',
+    }
+end)
+
+lib.callback.register('hype_banking:server:addAccountMember', function(source, data)
+    -- Input validation
+    local account, member = data.account, data.memberId
+    if not account or not member then
+        return { status = 'error', message = 'Invalid input parameters' }
+    end
+
+    local Player = core.GetPlayer(source)
+    if not Player then
+        return { status = 'error', message = locale("player_not_found") }
+    end
+    local acc = accounts.getAccount(account)
+    if not acc then 
+        return { status = 'error', message = locale("account_not_found") }
+    end
+
+    -- Check if player has permission to add members
+    if Player.identifier ~= acc.creator then 
+        return { status = 'error', message = locale("illegal_action", Player.name) }
+    end
+
+
+    local Player2 = core.GetPlayer(member) or core.GetPlayerById(member)
+    if not Player2 then 
+        return { status = 'error', message = locale("target_not_found") }
+    end
+
+    if Player2.identifier == Player.identifier then
+        return { status = 'error', message = locale("cannot_add_self") }
+    end
+
+    local identifier = Player2.identifier -- Fixed typo in variable name
+    
+    -- Initialize player cache if needed
+    if not cachedPlayers[identifier] then
+        onPlayerLoad(identifier)
+        cachedPlayers[identifier].accounts[#cachedPlayers[identifier].accounts + 1] = account
+    end
+
+    -- Update account authorization
+    local auth = {}
+    for k in pairs(acc.auth) do 
+        auth[#auth + 1] = k 
+    end
+    auth[#auth + 1] = identifier
+    acc.auth[identifier] = true
+
+    -- Update database
+    MySQL.update('UPDATE bank_accounts_new SET auth = ? WHERE id = ?', {
+        json.encode(auth),
+        account
+    })
+
+    return {
+        status = 'success',
+        message = locale("member_added_success")
+    }
+end)
+
+lib.callback.register('hype_banking:server:removeAccountMember', function(source, data)
+    local Player = core.GetPlayer(source)
+    if not Player then 
+        return { status = 'error', message = locale("player_not_found") }
+    end
+
+    local account, member = data.account, data.memberId
+    if not account or not member then
+        return { status = 'error', message = locale("invalid_parameters") }
+    end
+
+    local acc = accounts.getAccount(account)
+    if not acc then 
+        return { status = 'error', message = locale("account_not_found") }
+    end
+
+    if Player.identifier ~= acc.creator then 
+        return { status = 'error', message = locale("not_account_owner") }
+    end
+
+    local Player2 = core.GetPlayer(member) or core.GetPlayerById(member)
+    if not Player2 then 
+        return { status = 'error', message = locale("member_not_found") }
+    end
+
+    if Player2.identifier == Player.identifier then
+        return { status = 'error', message = locale("cannot_remove_self") }
+    end
+
+    local identifier = Player2.identifier
+    
+    -- Remove member from account's auth list
+    if acc.auth[identifier] then
+        acc.auth[identifier] = nil
+        
+        -- Update cached player's accounts
+        if cachedPlayers[identifier] then
+            for i = #cachedPlayers[identifier].accounts, 1, -1 do
+                if cachedPlayers[identifier].accounts[i] == account then
+                    table.remove(cachedPlayers[identifier].accounts, i)
+                    break
+                end
+            end
+        end
+
+        -- Update database
+        MySQL.update('UPDATE bank_accounts SET auth = ? WHERE id = ?', {
+            json.encode(acc.auth),
+            account
+        })
+
+        return { 
+            status = 'success', 
+            message = locale("member_removed"),
+            members = acc.auth,
+        }
+    end
+
+    return {
+        status = 'error',
+        message = locale("member_not_in_account")
+    }
+end)
+
+lib.callback.register('hype_banking:server:deleteAccount', function (src, data)
+    local Player = core.GetPlayer(src)
+    if not Player then return end
+    local account = data.account
+    local acc = accounts.getAccount(account)
+    if not acc then return end
+    if Player.identifier ~= acc.creator then return end
+    accounts.delete(account, cachedPlayers)
+    return {
+        status = 'success',
+    }
+end)
+
 lib.callback.register('hype_banking:server:payInvoice', function (src, data)
     return invoice.payInvoice(src, data.invoice_id)
 end)
