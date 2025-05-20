@@ -39,6 +39,7 @@ jobs:
           cp -r ./shared ./temp/hype_banking/
           cp -r ./web/build ./temp/hype_banking/web/
           cp ./fxmanifest.lua ./temp/hype_banking/
+          cp ./README.md ./temp/hype_banking/
           cd ./temp && zip -r ../hype_banking.zip ./hype_banking
           
       - name: Create Release
