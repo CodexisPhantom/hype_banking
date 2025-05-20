@@ -99,9 +99,9 @@ A custom-enhanced version of [Renewed Banking Revamp](https://github.com/prosir/
   ```
 
 ### Transaction Management
-- `createTransaction`: Create a new transaction record
+- `CreateTransaction`: Create a new transaction record
   ```lua
-  local transaction = exports['hype_banking']:createTransaction({
+  local transaction = exports['hype_banking']:CreateTransaction({
       account = 'account_id',
       title = 'Transaction Title',
       amount = 1000,
