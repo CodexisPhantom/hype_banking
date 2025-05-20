@@ -7,6 +7,8 @@
   import InvoiceItem from "./Invoices/InvoiceItem.svelte";
   import { fly } from "svelte/transition";
   import { formatMoney } from "$utils/misc";
+  import { get } from "svelte/store";
+  $: translationsValue = get(translations);
 
   onMount(() => {
     fetchNui<InvoiceProps[]>("hype_banking:client:getInvoices").then((data) => {
@@ -92,14 +94,14 @@
           <h2
             class="text-xs uppercase tracking-wider text-white/80 font-medium mb-1"
           >
-            Invoices
+            {translationsValue.invoices || "Invoices"}
           </h2>
         </div>
       </div>
 
       <div class="mb-4">
         <div class="text-4xl font-bold" style="transition: none;">
-          Personal Invoices
+          {translationsValue.personal_invoices || "Personal Invoices"}
         </div>
       </div>
       <div class="flex justify-between items-start mb-4">
@@ -107,7 +109,7 @@
           <h2
             class="text-xs uppercase tracking-wider text-white/80 font-medium mb-1"
           >
-            {formatMoney(totalPendingInvoices)} Total Pending
+            {(translationsValue.total_pending || "%s Total Pending").replace("%s", formatMoney(totalPendingInvoices))}
           </h2>
         </div>
       </div>
@@ -120,20 +122,20 @@
         class="flex items-center justify-center py-3 px-2 bg-fleeca-green text-white rounded-lg font-medium hover:bg-fleeca-dark-green transition-all shadow-sm"
       >
         <i class="fas fa-money-check text-white mr-2"></i>
-        <span>{paidInvoices} Paid</span>
+        <span>{paidInvoices} {translationsValue.paid || "Paid"}</span>
       </button>
       <button
         class="flex items-center justify-center py-3 px-2 bg-fleeca-hover text-fleeca-text rounded-lg font-medium hover:bg-fleeca-bg transition-all border border-fleeca-border shadow-sm"
       >
         <i class="fas fa-money-bill-transfer mr-2"></i>
-        <span>{pendingInvoices} Pending</span>
+        <span>{pendingInvoices} {translationsValue.pending || "Pending"}</span>
       </button>
       <button
         on:click={() => showPendingPopup = true}
         class="flex items-center justify-center py-3 px-2 bg-fleeca-hover text-fleeca-text rounded-lg font-medium hover:bg-fleeca-bg transition-all border border-fleeca-border shadow-sm"
       >
         <i class="fas fa-exchange-alt mr-2"></i>
-        <span>Pay Pending Invoices</span>
+        <span>{translationsValue.pay_pending || "Pay Pending Invoices"}</span>
       </button>
     </div>
   </div>
@@ -147,7 +149,7 @@
       >
         <i class="fa-solid fa-receipt text-fleeca-green"></i>
       </div>
-      {"Invoices"}
+      {translationsValue.invoices || "Invoices"}
     </h3>
   </div>
 
@@ -155,7 +157,7 @@
     <input
       type="text"
       class="w-full rounded-lg border border-fleeca-border p-3 pl-10 bg-fleeca-card focus:border-none text-fleeca-text focus:border-fleeca-green transition-all"
-      placeholder={"Search invoice..."}
+      placeholder={translationsValue.search_invoices || "Search invoices..."}
       bind:value={transSearch}
     />
     <i
@@ -202,9 +204,7 @@
             ></i>
           </div>
           <h3 class="text-fleeca-text font-medium">
-            {$translations && $translations.trans_not_found
-              ? $translations.trans_not_found
-              : "No invoices found"}
+            {translationsValue.no_invoices_found || "No invoices found"}
           </h3>
         </div>
       {/if}
@@ -219,9 +219,7 @@
           ></i>
         </div>
         <h3 class="text-fleeca-text font-medium">
-          {$translations && $translations.trans_not_found
-            ? $translations.trans_not_found
-            : "No transactions found"}
+          {translationsValue.no_invoices_found || "No invoices found"}
         </h3>
       </div>
     {/if}
@@ -274,14 +272,14 @@
       <h3 class="text-xl font-semibold text-fleeca-text mb-4">Confirm Payment</h3>
       
       <div class="mb-6">
-        <p class="text-fleeca-text-secondary mb-2">You are about to pay all pending invoices:</p>
+        <p class="text-fleeca-text-secondary mb-2">{translationsValue.confirm_pay_pending || "You are about to pay all pending invoices:"}</p>
         <div class="bg-fleeca-bg rounded-lg p-4 border border-fleeca-border">
           <div class="flex justify-between items-center">
-            <span class="text-fleeca-text">Total Amount:</span>
+            <span class="text-fleeca-text">{translationsValue.total_amount || "Total Amount:"}</span>
             <span class="text-fleeca-text font-semibold">{formatMoney(totalPendingInvoices)}</span>
           </div>
           <div class="flex justify-between items-center mt-2">
-            <span class="text-fleeca-text">Number of Invoices:</span>
+            <span class="text-fleeca-text">{translationsValue.number_of_invoices || "Number of Invoices:"}</span>
             <span class="text-fleeca-text font-semibold">{pendingInvoices}</span>
           </div>
         </div>
@@ -292,13 +290,13 @@
           on:click={payAllPendingInvoices}
           class="flex-1 bg-fleeca-green text-white py-2 px-4 rounded-lg font-medium hover:bg-fleeca-dark-green transition-all"
         >
-          Confirm Payment
+          {translationsValue.confirm_payment || "Confirm Payment"}
         </button>
         <button
           on:click={() => showPendingPopup = false}
           class="flex-1 bg-fleeca-hover text-fleeca-text py-2 px-4 rounded-lg font-medium hover:bg-fleeca-bg transition-all border border-fleeca-border"
         >
-          Cancel
+          {translationsValue.cancel || "Cancel"}
         </button>
       </div>
     </div>

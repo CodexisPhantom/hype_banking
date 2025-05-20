@@ -5,8 +5,10 @@
   import { invoices, visibility } from "../store/stores";
   import { formatMoney } from "$utils/misc";
   import type { InvoiceProps } from "src/types/invoices";
-  import { useNuiEvent } from "$utils/useNuiEvent";
-
+  import { useNuiEvent } from "$utils/useNuiEvent"
+  import { translations } from "../store/stores";
+  import { get } from "svelte/store";
+  $: translationsValue = get(translations) || {};
   useNuiEvent("setInvoices", (data: InvoiceProps[]) => {
     invoices.set(data || []);
   });
@@ -124,10 +126,10 @@
           </div>
           <div>
             <h1 class="text-2xl font-bold text-fleeca-text font-display">
-              Invoices
+              {translationsValue.invoices || "Invoices"}
             </h1>
             <p class="text-fleeca-green text-sm font-medium">
-              Invoices Management
+              {translationsValue.invoices_management || "Invoices Management"}
             </p>
           </div>
         </div>
@@ -154,19 +156,19 @@
               class="flex items-center justify-center py-3 px-2 bg-fleeca-hover text-white rounded-lg font-medium hover:bg-fleeca-dark-green transition-all shadow-sm"
             >
               <i class="fas fa-arrow-down text-white mr-2"></i>
-              <span>{totalPaidInvoices} Paid Invoices</span>
+              <span>{(translationsValue.paid_invoices || "%s Paid Invoices").replace("%s", totalPaidInvoices.toString())}</span>
             </button>
             <button
               class="flex items-center justify-center py-3 px-2 bg-fleeca-hover text-white rounded-lg font-medium hover:bg-fleeca-dark-green transition-all shadow-sm"
             >
               <i class="fas fa-arrow-down text-white mr-2"></i>
-              <span>{totalUnpaidInvoices} Unpaid Invoices</span>
+              <span>{(translationsValue.unpaid_invoices || "%s Unpaid Invoices").replace("%s", totalUnpaidInvoices.toString())}</span>
             </button>
             <button
               class="flex items-center justify-center py-3 px-2 bg-fleeca-hover text-white rounded-lg font-medium hover:bg-fleeca-dark-green transition-all shadow-sm"
             >
               <i class="fas fa-arrow-down text-white mr-2"></i>
-              <span>{formatMoney(totalEarnings)} Total Earning</span>
+              <span>{(translationsValue.total_earning || "%s Total Earning").replace("%s", formatMoney(totalEarnings))}</span>
             </button>
           </div>
         </div>
@@ -179,7 +181,7 @@
             >
               <i class="fa-solid fa-receipt text-fleeca-green"></i>
             </div>
-            Invoices
+            {translationsValue.invoices || "Invoices"}
           </h3>
 
           <button
@@ -194,7 +196,7 @@
           <input
             type="text"
             class="w-full rounded-lg border border-fleeca-border p-3 pl-10 bg-fleeca-card text-fleeca-text focus:border-fleeca-green transition-all"
-            placeholder="Search invoices..."
+            placeholder={translationsValue.search_invoices || "Search invoices..."}
             bind:value={searchQuery}
           />
           <i
@@ -213,15 +215,15 @@
               <div
                 class="grid grid-cols-9 gap-4 px-4 py-3 text-sm font-medium text-fleeca-text"
               >
-                <div>Invoice ID</div>
-                <div>Status</div>
-                <div>Total</div>
-                <div>Author</div>
-                <div>Author ID</div>
-                <div>Receiver</div>
-                <div>Receiver ID</div>
-                <div>Date</div>
-                <div>Actions</div>
+              <div>{translationsValue.invoice_id || "Invoice ID"}</div>
+              <div>{translationsValue.status || "Status"}</div>
+              <div>{translationsValue.total || "Total"}</div>
+              <div>{translationsValue.author || "Author"}</div>
+              <div>{translationsValue.author_id || "Author ID"}</div>
+              <div>{translationsValue.receiver || "Receiver"}</div>
+              <div>{translationsValue.receiver_id || "Receiver ID"}</div>
+              <div>{translationsValue.date || "Date"}</div>
+              <div>{translationsValue.actions || "Actions"}</div>
               </div>
             </div>
 
@@ -280,7 +282,7 @@
                       ></i>
                     </div>
                     <h3 class="text-fleeca-text font-medium">
-                      No invoices found
+                      {translationsValue.no_invoices_found || "No invoices found"}
                     </h3>
                   </div>
                 {/if}
@@ -294,10 +296,10 @@
                   <div
                     class="flex items-center text-sm text-fleeca-text-secondary"
                   >
-                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(
-                      currentPage * itemsPerPage,
-                      filteredInvoices.length
-                    )} of {filteredInvoices.length} invoices
+                  {(translationsValue.showing_invoices || "Showing %s to %s of %s invoices")
+                  .replace("%s", ((currentPage - 1) * itemsPerPage + 1).toString())
+                  .replace("%s", Math.min(currentPage * itemsPerPage, filteredInvoices.length).toString())
+                  .replace("%s", filteredInvoices.length.toString())}
                   </div>
                   <div class="flex items-center space-x-2">
                     <button
@@ -342,7 +344,7 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-fleeca-card rounded-xl p-6 max-w-lg w-full mx-4 shadow-xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-fleeca-text">Invoice Details</h3>
+        <h3 class="text-xl font-bold text-fleeca-text">{translationsValue.invoice_details || "Invoice Details"}</h3>
         <button
           aria-label="Close"
           on:click={() => toggleDetailsModal(null)}
@@ -354,12 +356,12 @@
 
       <div class="space-y-4">
         <div class="grid grid-cols-2 gap-4 text-sm">
-          <div class="text-fleeca-text-secondary">Invoice ID</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.invoice_id || "Invoice ID"}</div>
           <div class="text-fleeca-text font-medium">
             {selectedInvoice.invoice_id}
           </div>
 
-          <div class="text-fleeca-text-secondary">Status</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.status || "Status"}</div>
           <div>
             <span
             class="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit {getBadgeStyles(selectedInvoice.status).background} {getBadgeStyles(selectedInvoice.status).text}"
@@ -369,29 +371,29 @@
           </span>
           </div>
 
-          <div class="text-fleeca-text-secondary">Total</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.total || "Total"}</div>
           <div class="text-fleeca-text">
             {formatMoney(selectedInvoice.total)}
           </div>
 
-          <div class="text-fleeca-text-secondary">Receiver</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.receiver || "Receiver"}</div>
           <div class="text-fleeca-text">{selectedInvoice.receiver_name}</div>
 
-          <div class="text-fleeca-text-secondary">Receiver Id</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.receiver_id || "Receiver Id"}</div>
           <div class="text-fleeca-text">{selectedInvoice.receiver_citizenid}</div>
 
-          <div class="text-fleeca-text-secondary">Author</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.author || "Author"}</div>
           <div class="text-fleeca-text">{selectedInvoice.author_name}</div>
 
-          <div class="text-fleeca-text-secondary">Author Id</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.author_id || "Author Id"}</div>
           <div class="text-fleeca-text">{selectedInvoice.author_citizenid}</div>
           
-          <div class="text-fleeca-text-secondary">Date</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.date || "Date"}</div>
           <div class="text-fleeca-text">
             {new Date(selectedInvoice.created_date * 1000).toLocaleDateString()}
           </div>
 
-          <div class="text-fleeca-text-secondary">Note</div>
+          <div class="text-fleeca-text-secondary">{translationsValue.note || "Note"}</div>
           <div class="text-fleeca-text">{selectedInvoice.note}</div>
         </div>
 
@@ -400,7 +402,7 @@
             on:click={() => toggleDetailsModal(null)}
             class="px-4 py-2 bg-fleeca-hover text-fleeca-text rounded-lg hover:bg-fleeca-bg transition-colors"
           >
-            Close
+            {translationsValue.close || "Close"}
           </button>
           {#if selectedInvoice.status === "pending"}
             <button
@@ -410,7 +412,7 @@
               }}
               class="px-4 py-2 bg-red-900/90 text-white rounded-lg hover:bg-red-800/90 transition-colors"
             >
-              Cancel Invoice
+              {translationsValue.cancel_invoice || "Cancel Invoice"}
             </button>
           {/if}
         </div>

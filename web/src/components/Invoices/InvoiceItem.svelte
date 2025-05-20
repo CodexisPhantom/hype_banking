@@ -6,7 +6,8 @@
   import { get } from "svelte/store";
   import type { InvoiceProps } from "src/types/invoices";
 
-  let translationsValue = get(translations);
+  // Make sure translationsValue exists and has the required properties
+  $: translationsValue = get(translations) || {};
 
   function getTimeElapsed(seconds: number): string {
     let retData: string;
@@ -78,7 +79,7 @@
             on:click={() => payInvoice(invoice)}
           >
             <i class={`fas ${transactionIcon} ${transactionColor}`}></i>
-            Pay Invoice
+            {translationsValue.invoice_pay || "Pay Invoice"}
           </button>
         {:else}
           <div
@@ -112,7 +113,10 @@
     <div class="flex justify-between items-center mb-3">
       <div>
         <span class={`${transactionColor} text-lg font-semibold`}>
-          {formatMoney(invoice.total)} {invoice.vat > 0 && " + VAT (" + invoice.vat + "%)" || ""}
+          {formatMoney(invoice.total)} 
+          {#if invoice.vat > 0}
+            {(translationsValue.invoice_vat || "+ VAT (%s%)").replace("%s", invoice.vat.toString())}
+          {/if}
         </span>
         <div class="text-fleeca-text-secondary text-xs mt-1">
           {invoice.receiver_name}
@@ -133,7 +137,7 @@
     <div
       class="bg-fleeca-bg p-3 rounded-lg mt-2 group-hover:bg-fleeca-hover transition-colors duration-300 border border-fleeca-border"
     >
-      <div class="text-fleeca-text-secondary text-xs mb-1">{"Note"}</div>
+      <div class="text-fleeca-text-secondary text-xs mb-1">{translationsValue.invoice_note || "Note"}</div>
       <div class="text-fleeca-text text-sm">{invoice.note}</div>
     </div>
   </div>
