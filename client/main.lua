@@ -5,8 +5,7 @@ local config = require 'shared.config'
 
 local function setConfig()
     local locales = lib.getLocales()
-    utils.sendMessage('setLocales',
-                      {translations = locales, currency = config.currency})
+    utils.sendMessage('setLocales', {translations = locales, currency = config.currency})
 end
 
 local function focusInterface(state)

@@ -63,7 +63,7 @@
     }, 3500);
   });
 
-  useNuiEvent<any>("updateLocale", (data) => {
+  useNuiEvent<any>("setLocales", (data) => {
     translations.set(data.translations);
     currency.set(data.currency);
   });

@@ -14,6 +14,7 @@
   import { get } from "svelte/store";
   import { fly } from "svelte/transition";
 
+  $: translationsValue = get(translations) || {};
   let transSearch = "";
   let balanceElement;
 
@@ -100,14 +101,14 @@
               class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500/20 text-white border border-red-500/30"
             >
               <i class="fa-solid fa-lock mr-1 text-xs"></i>
-              {$translations.frozen || "Frozen"}
+              {translationsValue.frozen || "Frozen"}
             </span>
           {/if}
         </div>
 
         <div class="mb-4">
           <h2 class="text-sm text-white/80 font-medium mb-1">
-            {$translations.balance || "Available Balance"}
+            {translationsValue.balance || "Available Balance"}
           </h2>
           <div
             bind:this={balanceElement}
@@ -129,7 +130,7 @@
               on:click={() => handleButton(account.id, "deposit")}
             >
               <i class="fas fa-arrow-down text-white mr-2"></i>
-              <span>{$translations.deposit_but || "Deposit"}</span>
+              <span>{translationsValue.deposit_but || "Deposit"}</span>
             </button>
           {/if}
           <button
@@ -137,7 +138,7 @@
             on:click={() => handleButton(account.id, "withdraw")}
           >
             <i class="fas fa-arrow-up mr-2"></i>
-            <span>{$translations.withdraw_but || "Withdraw"}</span>
+            <span>{translationsValue.withdraw_but || "Withdraw"}</span>
           </button>
           <button
             class="flex items-center justify-center py-3 px-2 bg-fleeca-hover text-fleeca-text rounded-lg font-medium hover:bg-fleeca-bg transition-all border border-fleeca-border shadow-sm"
@@ -145,7 +146,7 @@
             on:click={() => handleButton(account.id, "transfer")}
           >
             <i class="fas fa-exchange-alt mr-2"></i>
-            <span>{$translations.transfer_but || "Transfer"}</span>
+            <span>{translationsValue.transfer_but || "Transfer"}</span>
           </button>
         </div>
       {/if}
@@ -160,7 +161,7 @@
         >
           <i class="fa-solid fa-receipt text-fleeca-green"></i>
         </div>
-        {$translations.transactions || "Transactions"}
+        {translationsValue.transactions || "Transactions"}
       </h3>
 
       {#if !isAtm && account.transactions && account.transactions.length > 0}
@@ -169,7 +170,7 @@
           on:click|preventDefault={handleClickExportData}
         >
           <i class="fa-solid fa-file-export mr-1"></i>
-          {$translations.export_data || "Export Data"}
+          {translationsValue.export_data || "Export Data"}
         </button>
       {/if}
     </div>
@@ -178,7 +179,7 @@
       <input
         type="text"
         class="w-full rounded-lg border border-fleeca-border p-3 pl-10 bg-fleeca-card text-fleeca-text focus:border-fleeca-green transition-all"
-        placeholder={$translations.trans_search || "Search transactions..."}
+        placeholder={translationsValue.trans_search || "Search transactions..."}
         bind:value={transSearch}
       />
       <i
@@ -219,8 +220,8 @@
               ></i>
             </div>
             <h3 class="text-fleeca-text font-medium">
-              {$translations && $translations.trans_not_found
-                ? $translations.trans_not_found
+              {translationsValue && translationsValue.trans_not_found
+                ? translationsValue.trans_not_found
                 : "No transactions found"}
             </h3>
           </div>
@@ -236,8 +237,8 @@
             ></i>
           </div>
           <h3 class="text-fleeca-text font-medium">
-            {$translations && $translations.trans_not_found
-              ? $translations.trans_not_found
+            {translationsValue && translationsValue.trans_not_found
+              ? translationsValue.trans_not_found
               : "No transactions found"}
           </h3>
         </div>
@@ -254,8 +255,8 @@
           <i class="fas fa-credit-card text-fleeca-green text-3xl"></i>
         </div>
         <h3 class="text-fleeca-text font-medium text-xl mb-3 font-display">
-          {$translations && $translations.select_account
-            ? $translations.select_account
+          {translationsValue && translationsValue.select_account
+            ? translationsValue.select_account
             : "Select a card"}
         </h3>
         <p class="text-fleeca-text-secondary">

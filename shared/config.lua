@@ -1,5 +1,5 @@
 local config = {}
-
+config.locale = 'en' -- en, id
 config.progressType = 'circle' -- circle or bar
 config.currency = 'USD'
 config.platinumThreshold = 75000 -- Amount required for an account to be considered platinum

@@ -1,6 +1,4 @@
 <script>
-  // @ts-nocheck
-
   import Banking from "./Banking.svelte";
   import Phone from "./components/Phone.svelte";
   import { fetchNui } from "$utils/fetchNui";
@@ -13,10 +11,9 @@
     }
   });
 
-
-  onMount(() => {
+  setTimeout(() => {
     fetchNui('appReady', {}).catch((err) => {});
-  })
+  }, 1000);
 
 </script>
 
