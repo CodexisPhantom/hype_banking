@@ -72,7 +72,7 @@ local function createTransaction(data)
         return data
     end
     return false
-end exports('createTransaction', createTransaction)
+end exports('CreateTransaction', createTransaction)
 
 local function getBankData(source)
     local Player = core.GetPlayer(source)
@@ -356,9 +356,6 @@ lib.callback.register('hype_banking:server:createNewAccount', function(source, d
     }
     local acc = accounts.new(newAccount)
     cachedPlayers[identifier].accounts[#cachedPlayers[identifier].accounts+1] = accountId
-    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{
-        accountId, newAccount.amount, json.encode(newAccount.transactions), json.encode({identifier}), newAccount.frozen, identifier
-    })
     return {
         status = 'success',
     }

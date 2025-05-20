@@ -74,6 +74,9 @@ function accounts.new(data)
         return end
     local acc = account:new(data)
     cachedAccounts[acc.id] = acc
+    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{
+        data.id, data.amount, json.encode(data.transactions), json.encode({data.creator}), data.frozen, data.creator
+    })
     return acc
 end exports('CreateAccount', accounts.new)
 
