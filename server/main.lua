@@ -184,7 +184,7 @@ function invoice.createInvoice(data)
     end
 
     return newInvoice
-end
+end exports('CreateInvoice', invoice.createInvoice)
 
 function invoice.getPlayerInvoices(identifier)
     local tmp = {}
@@ -195,7 +195,7 @@ function invoice.getPlayerInvoices(identifier)
         end
     end
     return tmp
-end
+end exports('GetPlayerInvoices', invoice.getPlayerInvoices)
 
 function invoice.getPlayerPendingInvoices(identifier)
     local tmp = {}
@@ -206,7 +206,7 @@ function invoice.getPlayerPendingInvoices(identifier)
         end
     end
     return tmp
-end
+end exports('GetPlayerPendingInvoices', invoice.getPlayerPendingInvoices)
 
 function invoice.getInvoiceByJob(job)
     local tmp = {}
@@ -217,7 +217,7 @@ function invoice.getInvoiceByJob(job)
         end
     end
     return tmp
-end
+end exports('GetInvoiceByJob', invoice.getInvoiceByJob)
 
 function invoice.payInvoice(source, invoice_id)
     local player = core.GetPlayer(source)
@@ -237,7 +237,7 @@ function invoice.payInvoice(source, invoice_id)
         status = 'success',
         balance = player.getMoney('bank')
     }
-end
+end exports('PayInvoice', invoice.payInvoice)
 
 local function getTotalAmount(inv)
     local total = 0
@@ -268,7 +268,23 @@ function invoice.payAllPendingInvoices(source)
         status = 'success',
         balance = playerMoney - total
     }
-end
+end exports('PayAllPendingInvoices', invoice.payAllPendingInvoices)
+
+function invoice.cancelInvoice(source,invoice_id)
+    local Player = core.GetPlayer(source)
+    if not Player then return end
+    local inv = invoices[invoice_id]
+    if not inv then print('no invoice found') return end
+    if not inv.author_job == Player.job.name then print('not your invoice') return end
+    if inv.status ~= 'pending' then print('invoice not pending') return end
+    inv.status = 'canceled'
+    MySQL.update('UPDATE invoices SET status = ? WHERE invoice_id = ?', {inv.status, inv.invoice_id})
+    invoices[inv.invoice_id] = inv
+    return {
+        status = 'success'
+    }
+end exports('CancelInvoice', invoice.cancelInvoice)
+
 --[[ Callbacks ]]--
 
 --Invoice Events--
@@ -528,17 +544,13 @@ end)
 lib.callback.register('hype_banking:server:cancelInvoice', function (src, data)
     local Player = core.GetPlayer(src)
     if not Player then return end
-    local inv = invoices[data.invoice_id]
-    if not inv then print('no invoice found') return end
-    if not inv.author_job == Player.job.name then print('not your invoice') return end
-    if inv.status ~= 'pending' then print('invoice not pending') return end
-    inv.status = 'canceled'
-    MySQL.update('UPDATE invoices SET status = ? WHERE invoice_id = ?', {inv.status, inv.invoice_id})
-    invoices[inv.invoice_id] = inv
+    local invoice_id = data.invoice_id
+    local resp = invoice.cancelInvoice(src,invoice_id)
     return {
-        status = 'success'
+        status = resp and 'success' or 'error'
     }
 end)
+
 --End Invoice Events--
 lib.callback.register('hype_banking:server:sendMoney', function(src, data)
     -- Input validation
