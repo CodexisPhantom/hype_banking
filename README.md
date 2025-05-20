@@ -24,9 +24,93 @@ A custom-enhanced version of [Renewed Banking Revamp](https://github.com/prosir/
 
 ## 🛠 Requirements
 
-* **ESX or QBCore(TODO)** framework
+* **ESX or QBCore** framework
 * **oxmysql**
 * **LB-phone** (optional, for mobile app support)
+
+## 📦 Server Exports
+
+### Account Management
+- `GetAllAccounts`: Get all bank accounts in the system
+  ```lua
+  local accounts = exports['hype_banking']:GetAllAccounts()
+  ```
+
+- `CreateAccount`: Create a new bank account
+  ```lua
+  local account = exports['hype_banking']:CreateAccount({
+      id = 'unique_id',
+      name = 'Account Name',
+      type = 'org',
+      frozen = false,
+      amount = 0,
+      transactions = {},
+      auth = { [identifier] = true },
+      creator = identifier
+  })
+  ```
+
+- `GetAccount`: Get a specific account by ID
+  ```lua
+  local account = exports['hype_banking']:GetAccount('account_id')
+  ```
+
+### Invoice Management
+- `CreateInvoice`: Create a new invoice
+  ```lua
+  local invoice = exports['hype_banking']:CreateInvoice({
+      player = source,
+      target = target_id,
+      item = 'Service',
+      amount = 1000,
+      note = 'Payment for services',
+      autopay = false
+  })
+  ```
+
+- `GetPlayerInvoices`: Get all invoices for a specific player
+  ```lua
+  local invoices = exports['hype_banking']:GetPlayerInvoices(identifier)
+  ```
+
+- `GetPlayerPendingInvoices`: Get pending invoices for a specific player
+  ```lua
+  local pendingInvoices = exports['hype_banking']:GetPlayerPendingInvoices(identifier)
+  ```
+
+- `GetInvoiceByJob`: Get all invoices for a specific job
+  ```lua
+  local jobInvoices = exports['hype_banking']:GetInvoiceByJob('job_name')
+  ```
+
+- `PayInvoice`: Pay a specific invoice
+  ```lua
+  local result = exports['hype_banking']:PayInvoice(source, 'invoice_id')
+  ```
+
+- `PayAllPendingInvoices`: Pay all pending invoices for a player
+  ```lua
+  local result = exports['hype_banking']:PayAllPendingInvoices(source)
+  ```
+
+- `CancelInvoice`: Cancel a specific invoice
+  ```lua
+  local result = exports['hype_banking']:CancelInvoice(source, 'invoice_id')
+  ```
+
+### Transaction Management
+- `createTransaction`: Create a new transaction record
+  ```lua
+  local transaction = exports['hype_banking']:createTransaction({
+      account = 'account_id',
+      title = 'Transaction Title',
+      amount = 1000,
+      message = 'Transaction description',
+      issuer = 'Sender Name',
+      receiver = 'Receiver Name',
+      trans_type = 'transfer'
+  })
+  ```
 
 ## 🙏 Credits
 
