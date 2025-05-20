@@ -1019,9 +1019,8 @@ MySQL.ready(function ()
             transactions = json.decode(v.transactions) or {},
             auth = json.decode(v.auth) or {},
             creator = v.creator
-        })
+        }, 'default')
     end
-
 
     local query = {}
     for _, v in pairs(Jobs) do
@@ -1034,7 +1033,7 @@ MySQL.ready(function ()
             transactions = {},
             auth = {},
             creator = nil
-        })
+        }, 'default')
         if acc then
             local qIdx = #query + 1
             query[qIdx] = {"INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{

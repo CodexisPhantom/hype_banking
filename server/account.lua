@@ -33,6 +33,10 @@ function account:addMoney(amount)
     assert(type(amount) == 'number', 'Invalid amount type')
     assert(amount > 0, 'Invalid amount')
     self.amount = self.amount + amount
+    MySQL.update.await('UPDATE bank_accounts_new SET amount = ? WHERE id = ?', {
+        self.amount,
+        self.id
+    })
     return self.amount
 end
 
@@ -48,6 +52,10 @@ function account:removeMoney(amount)
     assert(amount > 0, 'Invalid amount')
     if self.amount < amount then return end
     self.amount = self.amount - amount
+    MySQL.update.await('UPDATE bank_accounts_new SET amount =? WHERE id =?', {
+        self.amount,
+        self.id
+    })
     return self.amount
 end
 
@@ -55,6 +63,10 @@ function account:setMoney(amount)
     assert(type(amount) == 'number', 'Invalid amount type')
     assert(amount > 0, 'Invalid amount')
     self.amount = amount
+    MySQL.update.await('UPDATE bank_accounts_new SET amount =? WHERE id =?', {
+        self.amount,
+        self.id
+    })
     return self.amount
 end
 
@@ -69,14 +81,17 @@ end exports('GetAllAccounts', accounts.getAllAccounts)
 --- Create Account
 ---@param data AccountProps
 ---@return Account | nil
-function accounts.new(data)
+function accounts.new(data, insert)
+    
     if cachedAccounts[data.id] then
         return end
     local acc = account:new(data)
     cachedAccounts[acc.id] = acc
-    MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{
-        data.id, data.amount, json.encode(data.transactions), json.encode({data.creator}), data.frozen, data.creator
-    })
+    if insert ~= 'default' then
+        MySQL.insert("INSERT INTO bank_accounts_new (id, amount, transactions, auth, isFrozen, creator) VALUES (?, ?, ?, ?, ?, ?) ",{
+            data.id, data.amount, json.encode(data.transactions), json.encode({data.creator}), data.frozen, data.creator
+        })
+    end
     return acc
 end exports('CreateAccount', accounts.new)
 
