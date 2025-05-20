@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 name 'hype_banking'
 author 'Hype Project'
-version '0.1.1'
+version '0.1.2'
 
 shared_scripts {
     '@ox_lib/init.lua',
