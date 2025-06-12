@@ -26,6 +26,10 @@ function account:constructor(data)
     self.transactions = data.transactions
     self.auth = data.auth
     self.creator = data.creator
+    self.addMoney = self.addMoney
+    self.setAccountName = self.setAccountName
+    self.removeMoney = self.removeMoney
+    self.setMoney = self.setMoney
     return self
 end
 
@@ -37,6 +41,7 @@ function account:addMoney(amount)
         self.amount,
         self.id
     })
+    cachedAccounts[self.id].amount = self.amount
     return self.amount
 end
 
@@ -44,6 +49,7 @@ function account:setAccountName(name)
     assert(type(name) == 'string', 'Invalid name type')
     if name == self.name then return end
     self.name = name
+    cachedAccounts[self.id].name = self.name
     return self.name
 end
 
@@ -56,6 +62,7 @@ function account:removeMoney(amount)
         self.amount,
         self.id
     })
+    cachedAccounts[self.id].amount = self.amount
     return self.amount
 end
 
@@ -67,6 +74,7 @@ function account:setMoney(amount)
         self.amount,
         self.id
     })
+    cachedAccounts[self.id].amount = self.amount
     return self.amount
 end
 
