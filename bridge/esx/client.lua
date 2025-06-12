@@ -24,10 +24,10 @@ RegisterNetEvent('esx:setJob', function (job)
     }
 end)
 
-RegisterNetEvent('esx:playerLoaded', function (PlayerData, isNew, skin)
+RegisterNetEvent('esx:playerLoaded', function (xPlayer, isNew, skin)
     if source == '' then return end
     PlayerData.job = {
-        name = PlayerData.job.name,
-        grade = PlayerData.job.grade,
+        name = xPlayer.job.name,
+        grade = xPlayer.job.grade,
     }
 end)
